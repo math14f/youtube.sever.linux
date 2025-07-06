@@ -1,4 +1,5 @@
 ```bash
+sudo apt update && sudo apt install -y python3 python3-pip && pip3 install yt-dlp --break-system-packages
 git clone https://github.com/math14f/youtube.sever.linux.git
 chmod +x youtube.sever.linux
 cd youtube.sever.linux
