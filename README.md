@@ -1,3 +1,12 @@
+```bash
+git clone https://github.com/math14f/HackGuld-Toolkit.git
+chmod +x HackGuld-Toolkit
+cd HackGuld-Toolkit
+sudo python3 white.hacker.tools.py
+
+
+
+
 YT Channel Downloader
 YT Channel Downloader is a self-hosted web application built with Flask, designed to automate the download and archiving of entire YouTube channels. It acts as a user-friendly graphical user interface (GUI) on top of the powerful command-line tool yt-dlp.
 
