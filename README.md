@@ -1,6 +1,6 @@
 ```bash
-git clone https://github.com/math14f/HackGuld-Toolkit.git
-chmod +x HackGuld-Toolkit
+git clone https://github.com/math14f/youtube.sever.linux.git
+chmod +x 
 cd HackGuld-Toolkit
 sudo python3 white.hacker.tools.py
 ```
