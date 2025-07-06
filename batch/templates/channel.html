@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}{{ channel.name }} - Kanal Detaljer{% endblock %}
+
+{% block content %}
+<div class="container">
+    {# Kanal Header Info #}
+    <div class="d-flex align-items-center mb-4">
+        {% if channel.thumbnail %}<img src="{{ channel.thumbnail }}" alt="{{ channel.name }}" class="thumbnail img-thumbnail me-3">{% else %}<div class="thumbnail bg-secondary text-white d-flex align-items-center justify-content-center me-3"><i class="fas fa-tv fa-3x"></i></div>{% endif %}
+        <div> <h2>{{ channel.name }}</h2> <p class="text-muted mb-1">ID: {{ channel.id }}</p> {% if channel.url %}<a href="{{ channel.url }}" target="_blank" class="btn btn-sm btn-outline-secondary me-2"><i class="fab fa-youtube"></i> YouTube</a>{% endif %} <small class="text-info" title="Cache Status: {{ cache_status }}"><i class="fas fa-bolt"></i> {% if cache_hit %}Cache hit{% else %}Cache miss{% endif %}</small> </div>
+        <div class="ms-auto text-end">
+             {% set current_status = channel.task.status if channel.task else None %}
+             {% if current_status %}<span class="badge rounded-pill ... status-badge d-block mb-1" title="{{ current_status }}"> {# ... Status tekst ... #} </span> {% endif %}
+             {% if channel.warning %}<small class="text-warning d-block mt-1" title="{{ channel.warning }}"><i class="fas fa-exclamation-triangle me-1"></i> {{ channel.warning }}</small>{% endif %}
+             <div class="action-buttons mt-2 d-flex align-items-center justify-content-end">
+                 {% if channel.task and channel.task.process %}
+                     <button class="btn btn-sm btn-danger stop-download-btn" data-url="{{ channel.url }}" title="Stop download"> <i class="fas fa-stop"></i> Stop </button>
+                 {% elif channel.url %}
+                      {# Form UDEN kvalitetsvælger #}
+                      <form action="{{ url_for('download_channel') }}" method="POST" class="d-inline">
+                         <input type="hidden" name="channel_url" value="{{ channel.url }}">
+                         <input type="hidden" name="channel_id" value="{{ channel.id }}">
+                         <input type="hidden" name="channel_name" value="{{ channel.name }}">
+                         <input type="hidden" name="channel_thumbnail" value="{{ channel.thumbnail or '' }}">
+                         <button type="submit" class="btn btn-sm btn-success start-download-btn" title="Start/Genoptag (1080p max)"> <i class="fas fa-play"></i> Start </button>
+                      </form>
+                 {% endif %}
+             </div>
+        </div>
+    </div> <hr>
+    {# Video Player #}
+    <div id="video-player-section" class="mb-4" style="display: none; position: sticky; top: 70px; z-index: 1000; background-color: #f0f0f0; padding: 1rem; border: 1px solid #ccc; border-radius: .375rem; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"> <div class="d-flex justify-content-between align-items-center"> <h4 id="videoTitle" class="mb-0 text-truncate" style="max-width: 85%;">...</h4> <button type="button" class="btn-close" onclick="closePlayer()"></button> </div> <video id="videoPlayer" width="100%" controls autoplay class="mt-2 bg-dark">...</video> </div>
+    {# Video Liste #}
+    <h3>Downloadede Videoer ({{ videos|length if videos is not none else 'Fejl' }})</h3>
+    <div id="video-list">
+    {% if videos %}
+        {% for video in videos %}
+        <div class="video-list-item mb-2">
+             <img src="{{ video.thumbnail or url_for('static', filename='placeholder.png') }}" alt="Thumbnail" class="video-thumbnail img-thumbnail">
+             <div class="flex-grow-1"> <strong>{{ video.title }}</strong><br> <small class="text-muted">Upload: {{ video.upload_date[:4] }}-{{ video.upload_date[4:6] }}-{{ video.upload_date[6:] if video.upload_date and video.upload_date != '00000000' else '?' }}</small> </div>
+             <button class="btn btn-sm btn-primary play-video-btn ms-auto" data-video-src="{{ url_for('serve_video', filepath=video.channel_id ~ '/' ~ video.filename) }}" data-video-title="{{ video.title }}"> <i class="fas fa-play"></i> Se </button>
+        </div>
+        {% endfor %}
+    {% elif channel.warning %} <p class="text-warning mt-3"><i class="fas fa-exclamation-triangle"></i> {{ channel.warning }}</p>
+    {% else %} <p class="text-muted mt-3">Ingen videoer.</p> {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{# Korrekt JavaScript for video player og knapper #}
+<script> const videoPlayerSection=document.getElementById('video-player-section');const videoPlayer=document.getElementById('videoPlayer');const videoTitleElement=document.getElementById('videoTitle');function playVideo(a,b){if(!videoPlayer||!videoTitleElement||!videoPlayerSection)return;console.log("Afspiller:",a,"Titel:",b);videoPlayer.src=a;videoTitleElement.textContent=b;videoPlayerSection.style.display='block';videoPlayer.load();videoPlayer.play().catch(c=>console.error("Afspilningsfejl:",c));setTimeout(()=>{window.scrollTo({top:videoPlayerSection.offsetTop-70,behavior:'smooth'})},100)}function closePlayer(){if(!videoPlayer||!videoPlayerSection)return;videoPlayer.pause();videoPlayer.removeAttribute('src');videoPlayer.load();videoPlayerSection.style.display='none'}document.addEventListener('DOMContentLoaded',function(){const d=document.getElementById('video-list');if(d){d.addEventListener('click',function(a){const b=a.target.closest('.play-video-btn');if(b){a.preventDefault();const c=b.dataset.videoSrc,e=b.dataset.videoTitle;if(c&&e!==void 0)playVideo(c,e);else console.error("Mangler data-*",b)}})}const f=new URLSearchParams(window.location.search),g=f.get('play');if(g&&d){console.log("Auto-play:",g);const h=`/${g}.`,i=Array.from(d.querySelectorAll('.play-video-btn')).find(a=>{const b=a.dataset.videoSrc;return b&&b.includes(h)});if(i){console.log("Fandt knap:",i);const j=i.dataset.videoSrc,k=i.dataset.videoTitle;if(j&&k!==void 0)setTimeout(()=>playVideo(j,k),300);else console.error("Mangler data-*")}else console.warn(`Knap for '${g}' ikke fundet.`)}document.querySelectorAll('.stop-download-btn').forEach(a=>{if(typeof handleStopDownload==='function'){a.addEventListener('click',b=>{b.preventDefault();handleStopDownload(a)})}else console.error("handleStopDownload mangler")});document.querySelectorAll('.start-download-btn').forEach(a=>{if(typeof handleStartDownload==='function'){a.addEventListener('click',b=>{b.preventDefault();handleStartDownload(a)})}else console.error("handleStartDownload mangler")})}); </script>
+{% endblock %}

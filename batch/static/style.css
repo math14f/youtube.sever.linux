@@ -1,0 +1,10 @@
+/* Tilføj eventuelt brugerdefineret CSS her */
+body {
+    padding-top: 70px; /* Juster efter behov hvis navbaren er højere */
+}
+
+.container {
+    max-width: 960px; /* Begræns bredden for bedre læsbarhed */
+}
+
+/* Tilføj mere specifik styling efter behov */

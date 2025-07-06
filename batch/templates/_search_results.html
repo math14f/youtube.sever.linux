@@ -1,0 +1,29 @@
+{% if results %}
+    <h5 class="mt-3">Søgeresultater fra YouTube:</h5>
+    <ul class="list-unstyled">
+        {% for item in results %}
+            <li class="search-result-item mb-2">
+                {% if item.thumbnail %}<img src="{{ item.thumbnail }}" alt="Thumbnail" class="thumbnail img-thumbnail me-3">{% else %}<div class="thumbnail bg-secondary text-white d-flex align-items-center justify-content-center me-3"><i class="fas fa-video fa-2x"></i></div>{% endif %}
+                <div class="flex-grow-1 info">
+                    <strong>{{ item.title }}</strong><br>
+                    {% if item.channel_name and item.channel_url %}<small class="text-muted">Kanal: {{ item.channel_name }}</small><br>{% elif item.url %}<small class="text-muted">URL: {{ item.url }}</small><br>{% endif %}
+                    {% if item.url %}<a href="{{ item.url }}" target="_blank" class="btn btn-sm btn-outline-info mt-1 py-0 px-1"><i class="fas fa-external-link-alt fa-xs"></i> <small>YouTube</small></a>{% endif %}
+                </div>
+                {# Form UDEN kvalitetsvælger #}
+                {% if item.channel_url and item.channel_id %}
+                    <form action="{{ url_for('download_channel') }}" method="POST" class="download-form">
+                        <input type="hidden" name="channel_url" value="{{ item.channel_url }}">
+                        <input type="hidden" name="channel_id" value="{{ item.channel_id }}">
+                        <input type="hidden" name="channel_name" value="{{ item.channel_name or '' }}">
+                        <input type="hidden" name="channel_thumbnail" value="{{ item.thumbnail or '' }}">
+                        <button type="submit" class="btn btn-sm btn-success download-channel-btn"> <i class="fas fa-download"></i> <span class="d-none d-lg-inline">Download (1080p)</span> </button>
+                    </form>
+                {% else %}
+                    <span class="text-muted ms-auto"><small>Kan ikke downloade</small></span>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+{% elif query %}
+    <p class="text-muted">Ingen resultater fundet på YouTube for denne søgning.</p>
+{% endif %}
