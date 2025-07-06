@@ -1,8 +1,8 @@
 ```bash
 git clone https://github.com/math14f/youtube.sever.linux.git
-chmod +x 
-cd HackGuld-Toolkit
-sudo python3 white.hacker.tools.py
+chmod +x youtube.sever.linux
+cd youtube.sever.linux
+sudo python3 app.py
 ```
 
 
